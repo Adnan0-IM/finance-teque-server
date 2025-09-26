@@ -1,18 +1,19 @@
 const mongoose = require("mongoose");
 const { ensureAdminUser } = require("../utils/admin");
 
-function connectDB() {
+const connectDB = async () => {
   // Connect to MongoDB
-  mongoose
-    .connect(
-      process.env.MONGODB_URI || "mongodb://localhost:27017/finance-teque",
-    )
-    .then(async () => {
-      console.log("MongoDB Connected");
+  try {
+      const connection = await mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/finance-teque")
+      console.log(`MongoDB Connected: ${connection.connection.host}`);
+
       // Seed an admin if configured
       await ensureAdminUser();
-    })
-    .catch((err) => console.error("MongoDB connection error:", err));
+
+  } catch (error) {
+      console.error("MongoDB connection error:", error) 
+      throw new Error(`MongoDB connection error: ${error}`);
+  }
 };
 
 module.exports = {connectDB}

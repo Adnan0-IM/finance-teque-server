@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const {
   sendVerificationEmail,
   sendResetPasswordEmail,
+  sendWelcomeEmail,
 } = require("../services/mail");
 
 // @desc    Register user
@@ -149,7 +150,9 @@ exports.verifyEmail = async (req, res) => {
     user.emailVerified = true;
     user.clearEmailVerificationCode();
     await user.save({ validateBeforeSave: false });
-
+    sendWelcomeEmail(user.email, user.name).catch((e) => {
+      console.error("Send welcome email failed:", e);
+    });
     res.status(200).json({
       success: true,
       message: "Email verified successfully, you can now login to your account",
@@ -515,10 +518,6 @@ const sendTokenResponse = (user, statusCode, res) => {
     path: "/",
   };
 
-  // Log token in development
-  if (process.env.NODE_ENV !== "production") {
-    console.log("Generated token:", token);
-  }
 
   res
     .status(statusCode)

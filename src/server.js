@@ -9,13 +9,13 @@ const swaggerUi = require("swagger-ui-express");
 const path = require("path");
 const swaggerSpec = require("./swagger");
 const { connectDB } = require("./config/db");
+const crypto = require("crypto")
 
 // Load env vars
 dotenv.config();
 // Load env vars (force the ../.env path so it works on aaPanel/PM2)
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
-connectDB()
 const app = express();
 
 // Body parser
@@ -55,7 +55,10 @@ app.use("/api/verification", verificationRoutes);
 app.use("/api/admin", adminRoutes);
 
 // Serve static files
-app.use(express.static(path.join(__dirname, "../..", "frontend", "dist")));
+app.use(express.static(path.join(__dirname, "../..", "finance-teque", "dist")));
+
+app.use(express.static(path.join(__dirname, "../..", "finance-teque", "dist")));
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Serve uploaded files
 app.use(
@@ -65,10 +68,9 @@ app.use(
     maxAge: "7d",
   }),
 );
-
 // Instead of using a wildcard, let's use a specific route for the SPA
 app.get("/", (_, res) => {
-  res.sendFile(path.join(__dirname, "../..", "frontend", "dist", "index.html"));
+  res.sendFile(path.join(__dirname, "../..", "finance-teque", "dist", "index.html"));
 });
 
 // Handle other routes for SPA
@@ -76,7 +78,7 @@ app.use((req, res, next) => {
   if (req.path.startsWith("/api")) {
     return next();
   }
-  res.sendFile(path.join(__dirname, "../..", "frontend", "dist", "index.html"));
+  res.sendFile(path.join(__dirname, "../..", "finance-teque", "dist", "index.html"));
 });
 
 // Multer/global error handler
@@ -105,6 +107,12 @@ app.get("/api/healthz", (_, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const startApp = async () => {
+  await connectDB()
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+
+}
+
+startApp()
