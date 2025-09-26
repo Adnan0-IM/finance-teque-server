@@ -16,7 +16,7 @@ const LOGO_URL = process.env.LOGO_URL || `${ASSET_BASE_URL}/logo.png`;
 const BRAND = {
   primary: "#d4af37",
   primaryDark: "#b8941f",
-  lightBg: "#fff8dc",
+  lightBg: "#fff8ff",
   dark: "#1a1a1a",
 };
 
@@ -39,7 +39,7 @@ const bulletproofButton = ({ href, label }) => `
   <a href="${href}" target="_blank" class="btn"
      style="background-color:${
        BRAND.primary
-     }; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; display:inline-block; font-size:16px;">
+     }; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; display:inline-block; font-size:15px>
     ${esc(label)}
   </a>
   <!--<![endif]-->
@@ -108,36 +108,36 @@ const baseTemplate = ({ title, bodyHtml }) => `
 const otpSection = ({ name, otp }) => `
   <h1 style="color:${
     BRAND.dark
-  }; font-size:24px; margin:0 0 16px; text-align:center;">Your Verification Code</h1>
-  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0 0 16px;">Hello ${esc(
+  }; font-size:20px; margin:0 0 15px; text-align:center;">Your Verification Code</h1>
+  <p style="color:#333333; font-size:15px; line-height:1.6; margin:0 0 15px;">Hello ${esc(
     name
   )},</p>
-  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0 0 16px;">
+  <p style="color:#333333; font-size:15px; line-height:1.6; margin:0 0 15px;">
     Use the verification code below to complete your request:
   </p>
-  <div style="background-color:#f9f9f9; border:1px solid #eeeeee; border-radius:6px; padding:18px; margin:20px 0; text-align:center;">
+  <div style="background-color:#f9f9f9; border:1px solid #eeeeee; border-radius:6px; padding:16px; margin:19px 0; text-align:center;">
     <span style="font-size:32px; font-weight:bold; letter-spacing:6px; color:${
       BRAND.primary
     };">${esc(otp)}</span>
   </div>
-  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0 0 16px;">This code expires in <strong>10 minutes</strong>.</p>
-  <p style="color:#666666; font-size:14px; line-height:1.6; margin:0;">If you didn’t request this, please ignore this email.</p>
+  <p style="color:#333333; font-size:15px; line-height:1.6; margin:0 0 15px;">This code expires in <strong>10 minutes</strong>.</p>
+  <p style="color:#666666; font-size:13px; line-height:1.6; margin:0;">If you didn’t request this, please ignore this email.</p>
 `;
 
 const resetSection = ({ name, resetUrl }) => `
   <h1 style="color:${
     BRAND.dark
-  }; font-size:24px; margin:0 0 16px; text-align:center;">Password Reset Request</h1>
-  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0 0 16px;">Hello ${esc(
+  }; font-size:20px; margin:0 0 15px; text-align:center;">Password Reset Request</h1>
+  <p style="color:#333333; font-size:15px; line-height:1.6; margin:0 0 15px;">Hello ${esc(
     name
   )},</p>
-  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0 0 24px;">
+  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0 0 22px;">
     We received a request to reset your password. Click the button below to set a new password.
   </p>
-  <div style="text-align:center; margin:24px 0;">
+  <div style="text-align:center; margin:22px 0;">
     ${bulletproofButton({ href: resetUrl, label: "Reset Password" })}
   </div>
-  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0 0 16px;">
+  <p style="color:#333333; font-size:14px; line-height:1.6; margin:0 0 16px;">
     This link expires in <strong>30 minutes</strong>. If you didn’t request this, ignore this email.
   </p>
   <p style="color:#333333; font-size:14px; line-height:1.6; margin:16px 0 6px;">Or copy and paste this URL:</p>
@@ -149,26 +149,26 @@ const resetSection = ({ name, resetUrl }) => `
 const welcomeSection = ({ name }) => `
   <h1 style="color:${
     BRAND.dark
-  }; font-size:24px; margin:0 0 16px; text-align:center;">Welcome to Finance Teque!</h1>
-  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0 0 16px;">Hello ${esc(
+  }; font-size:20px; margin:0 0 15px; text-align:center;">Welcome to Finance Teque!</h1>
+  <p style="color:#333333; font-size:15px; line-height:1.6; margin:0 0 15px;">Hello ${esc(
     name
   )},</p>
-  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0 0 16px;">
+  <p style="color:#333333; font-size:14px; line-height:1.6; margin:0 0 15px;">
     We’re excited to have you with us. Explore ethical investment opportunities and track your portfolio with ease.
   </p>
-  <div style="text-align:center; margin:24px 0;">
+  <div style="text-align:center; margin:22px 0;">
     ${bulletproofButton({
       href: `${APP_URL}/dashboard`,
       label: "Access Your Account",
     })}
   </div>
-  <ul style="color:#333333; font-size:16px; line-height:1.6; margin:0 0 16px; padding-left:20px;">
+  <ul style="color:#333333; font-size:14px; line-height:1.6; margin:0 0 16px; padding-left:20px;">
     <li style="margin-bottom:8px;">Access ethical investment opportunities</li>
     <li style="margin-bottom:8px;">Get financing for your business</li>
     <li style="margin-bottom:8px;">Connect with strategic partners</li>
     <li style="margin-bottom:8px;">Track your portfolio performance</li>
   </ul>
-  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0;">Need help? Send us an email at <a href="mailto:support@financeteque.com">support@financeteque.com</a>.</p>
+  <p style="color:#333333; font-size:14px; line-height:1.6; margin:0;">Need help? Send us an email at <a href="mailto:support@financeteque.com">support@financeteque.com</a>.</p>
 `;
 
 // Public API
