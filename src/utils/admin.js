@@ -26,6 +26,7 @@ async function ensureAdminUser() {
     password, // hashed by pre-save hook
     role: "admin",
     isVerified: true,
+    emailVerified: true,
   });
 
   console.log("[Admin seed] Admin user created:", email);

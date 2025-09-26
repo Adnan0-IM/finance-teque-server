@@ -55,9 +55,9 @@ const baseTemplate = ({ title, bodyHtml }) => `
   <title>${esc(title)}</title>
   <style>
     @media only screen and (max-width:600px){
-      .container-pad { padding:24px !important; }
-      h1 { font-size:20px !important; }
-      .btn { display:block !important; padding:12px 20px !important; }
+      .container-pad { padding:22px !important; }
+      h1 { font-size:18px !important; }
+      .btn { display:block !important; padding:12px 18px !important; }
     }
     a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
     img { border:0; outline:none; text-decoration:none; }
@@ -71,7 +71,7 @@ const baseTemplate = ({ title, bodyHtml }) => `
     BRAND.lightBg
   }">
     <tr>
-      <td align="center" style="padding:40px 12px;">
+      <td align="center">
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
                style="max-width:600px; background-color:#ffffff; border-radius:10px; box-shadow:0 4px 6px rgba(0,0,0,0.08); overflow:hidden;">
           <tr>
@@ -83,12 +83,12 @@ const baseTemplate = ({ title, bodyHtml }) => `
             </td>
           </tr>
           <tr>
-            <td class="container-pad" style="padding:36px 32px;">
+            <td class="container-pad" style="padding:34px 30px;">
               ${bodyHtml}
             </td>
           </tr>
           <tr>
-            <td style="padding:20px 32px 36px;">
+            <td style="padding:18px 30px 34px;">
               <div style="border-top:1px solid #eeeeee; padding-top:16px; text-align:center; color:#666666; font-size:13px; line-height:1.5;">
                 <p style="margin:0 0 8px;">Best regards,<br><strong>Finance Teque Team</strong></p>
                 <p style="margin:0 0 8px; color:#888888;">18B. Fatima Plaza, Second Floor, Murtala Muhammad Way, Kano, Nigeria</p>
@@ -168,7 +168,7 @@ const welcomeSection = ({ name }) => `
     <li style="margin-bottom:8px;">Connect with strategic partners</li>
     <li style="margin-bottom:8px;">Track your portfolio performance</li>
   </ul>
-  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0;">Need help? Reply to this email.</p>
+  <p style="color:#333333; font-size:16px; line-height:1.6; margin:0;">Need help? Send us an email at <a href="mailto:support@financeteque.com">support@financeteque.com</a>.</p>
 `;
 
 // Public API
