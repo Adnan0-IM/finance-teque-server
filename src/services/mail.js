@@ -39,7 +39,7 @@ const bulletproofButton = ({ href, label }) => `
   <a href="${href}" target="_blank" class="btn"
      style="background-color:${
        BRAND.primary
-     }; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; display:inline-block; font-size:15px>
+     }; color:#ffffff; font-weight:bold; text-decoration:none; padding:14px 30px; border-radius:6px; display:inline-block; font-size:15px;">
     ${esc(label)}
   </a>
   <!--<![endif]-->
@@ -171,7 +171,28 @@ const welcomeSection = ({ name }) => `
   <p style="color:#333333; font-size:14px; line-height:1.6; margin:0;">Need help? Send us an email at <a href="mailto:support@financeteque.com">support@financeteque.com</a>.</p>
 `;
 
-// Public API
+// Add: section and functions for verification submission emails
+const verificationReceivedSection = ({ name }) => `
+  <h1 style="color:${
+    BRAND.dark
+  }; font-size:20px; margin:0 0 15px; text-align:center;">Verification Submitted</h1>
+  <p style="color:#333333; font-size:15px; line-height:1.6; margin:0 0 15px;">Hello ${esc(
+    name
+  )},</p>
+  <p style="color:#333333; font-size:14px; line-height:1.6; margin:0 0 15px;">
+    We’ve received your verification details. Our team will review them and notify you once the process is complete.
+  </p>
+  <div style="text-align:center; margin:22px 0;">
+    ${bulletproofButton({
+      href: `${APP_URL}/dashboard`,
+      label: "View Dashboard",
+    })}
+  </div>
+  <p style="color:#666666; font-size:13px; line-height:1.6; margin:0;">
+    If you didn’t initiate this, please contact support immediately.
+  </p>
+`;
+
 async function sendVerificationEmail(to, code) {
   const name = to.split("@")[0];
   const html = baseTemplate({
@@ -225,8 +246,61 @@ async function sendWelcomeEmail(to, name = to.split("@")[0]) {
   await sgMail.send(msg);
 }
 
+async function sendVerificationSubmittedEmail(to, name = to.split("@")[0]) {
+  const html = baseTemplate({
+    title: "Verification Submitted",
+    bodyHtml: verificationReceivedSection({ name }),
+  });
+
+  const msg = {
+    to,
+    from: FROM,
+    subject: "We received your verification details",
+    text: `Hello ${name},\n\nWe’ve received your verification details. We’ll notify you once the review is complete.\n\nYou can check your dashboard: ${APP_URL}/dashboard`,
+    html,
+  };
+  await sgMail.send(msg);
+}
+
+async function sendAdminVerificationNotification(
+  to,
+  { email, name = email.split("@")[0] }
+) {
+  const title = "New verification submission";
+  const bodyHtml = `
+    <h1 style="color:${
+      BRAND.dark
+    }; font-size:20px; margin:0 0 15px; text-align:center;">New Verification Submitted</h1>
+    <p style="color:#333333; font-size:14px; line-height:1.6; margin:0 0 10px;">
+      A user has submitted verification details:
+    </p>
+    <ul style="color:#333333; font-size:14px; line-height:1.6; margin:0 0 16px; padding-left:20px;">
+      <li><strong>Name:</strong> ${esc(name)}</li>
+      <li><strong>Email:</strong> ${esc(email)}</li>
+    </ul>
+    <div style="text-align:center; margin:22px 0;">
+      ${bulletproofButton({
+        href: `${APP_URL}/admin`,
+        label: "Open Admin Panel",
+      })}
+    </div>
+  `;
+  const html = baseTemplate({ title, bodyHtml });
+
+  const msg = {
+    to,
+    from: FROM,
+    subject: "New verification submission",
+    text: `New verification submitted.\nName: ${name}\nEmail: ${email}\nAdmin: ${APP_URL}/admin`,
+    html,
+  };
+  await sgMail.send(msg);
+}
+
 module.exports = {
   sendVerificationEmail,
   sendResetPasswordEmail,
   sendWelcomeEmail,
+  sendVerificationSubmittedEmail,
+  sendAdminVerificationNotification,
 };

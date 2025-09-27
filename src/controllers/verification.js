@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const path = require("path");
+const mail = require("../services/mail"); // add
 
 // @desc    Submit investor verification data
 // @route   POST /api/verification
@@ -35,7 +36,6 @@ exports.submitVerification = async (req, res) => {
         .json({ success: false, message: "User not found" });
     }
 
-    // Update nested paths without replacing the whole object
     user.set({
       "verification.personal": {
         firstName,
@@ -62,9 +62,34 @@ exports.submitVerification = async (req, res) => {
         accountType,
       },
       "verification.status": "pending",
+      "verification.submittedAt": new Date(), // set timestamp
     });
 
     await user.save();
+
+    // Fire emails (do not block response if mail fails)
+    const displayName =
+      firstName ||
+      user.name ||
+      (user.email ? user.email.split("@")[0] : "User");
+    mail
+      .sendVerificationSubmittedEmail(user.email, displayName)
+      .catch((e) =>
+        console.error("sendVerificationSubmittedEmail failed:", e.message)
+      );
+
+    if (process.env.ADMIN_EMAIL) {
+      const adminName =
+        [firstName, surname].filter(Boolean).join(" ") || displayName;
+      mail
+        .sendAdminVerificationNotification(process.env.ADMIN_EMAIL, {
+          email: user.email,
+          name: adminName,
+        })
+        .catch((e) =>
+          console.error("sendAdminVerificationNotification failed:", e.message)
+        );
+    }
 
     res.status(200).json({
       success: true,
