@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const {
   sendVerificationEmail,
   sendResetPasswordEmail,
@@ -233,7 +234,7 @@ exports.resendVerificationCode = async (req, res) => {
 };
 
 // @desc PUT set Current logged i user role
-// @route PUT /api/auth/role
+// @route PUT /api/auth/setRole
 // @access Private
 exports.setRole = async (req, res) => {
   // allowed roles ["investor", "startup"]
@@ -288,12 +289,8 @@ exports.getMe = async (req, res) => {
     res.status(200).json({
       success: true,
       data: {
-        id: user?._id,
-        name: user?.name,
-        email: user?.email,
-        role: user?.role,
-        isVerified: user?.isVerified,
-        phone: user?.phone,
+        ...user._doc,
+        password: undefined,
       },
     });
   } catch (error) {
@@ -348,7 +345,7 @@ exports.updateMe = async (req, res) => {
 };
 
 // @desc    Delete current logged in user
-// @route   DELETE /api/auth/delete
+// @route   DELETE /api/auth/deleteMe
 // @access  Private
 exports.deleteMe = async (req, res) => {
   try {
@@ -362,7 +359,7 @@ exports.deleteMe = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     };
 
-    res.cookie("token", "none", options);
+    res.cookie("refreshToken", "none", options);
 
     res.status(200).json({
       success: true,
@@ -391,7 +388,7 @@ exports.logout = async (req, res) => {
     path: "/",
   };
 
-  res.cookie("token", "none", options);
+  res.cookie("refreshToken", "none", options);
 
   res.status(200).json({
     success: true,
@@ -477,13 +474,98 @@ exports.resetPassword = async (req, res) => {
   res.status(200).json({ success: true, message: "Password reset successful" });
 };
 
+// @desc    Refresh access token using httpOnly refresh cookie
+// @route   POST /api/auth/refresh
+// @access  Public (uses httpOnly cookie)
+exports.refresh = async (req, res) => {
+  try {
+    const refreshToken =
+      req.cookies?.refreshToken ||
+      req.body?.refreshToken ||
+      req.headers["x-refresh-token"];
+
+    if (!refreshToken) {
+      return res
+        .status(401)
+        .json({ success: false, message: "No refresh token" });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET || "somesecret"
+      );
+    } catch {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid refresh token" });
+    }
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Issue new tokens (rotate refresh token)
+    const accessToken = user.getSignedAccessToken();
+    const newRefreshToken = user.getSignedResfreshToken();
+
+    // Cookie options (same as login)
+    let cookieExpire = process.env.REFRESH_TOKEN_EXPIRES || "7d";
+    let expireMs = 7 * 24 * 60 * 60 * 1000;
+    if (typeof cookieExpire === "string") {
+      const match = cookieExpire.match(/^(\d+)([dhms])$/);
+      if (match) {
+        const value = parseInt(match[1], 10);
+        const unit = match[2];
+        expireMs =
+          unit === "d"
+            ? value * 24 * 60 * 60 * 1000
+            : unit === "h"
+            ? value * 60 * 60 * 1000
+            : unit === "m"
+            ? value * 60 * 1000
+            : value * 1000;
+      }
+    }
+    const options = {
+      expires: new Date(Date.now() + expireMs),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
+    };
+
+    return res
+      .cookie("refreshToken", newRefreshToken, options)
+      .status(200)
+      .json({
+        success: true,
+        accessToken,
+        user: { ...user._doc, password: undefined }
+      });
+  } catch (error) {
+    console.error("Refresh error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error refreshing token",
+      error: error.message,
+    });
+  }
+};
+
 // Helper function to get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
   // Create token
-  const token = user.getSignedJwtToken();
+  const accessToken = user.getSignedAccessToken();
+
+  const refreshToken = user.getSignedResfreshToken();
 
   // Parse cookie expiration time
-  let cookieExpire = process.env.JWT_COOKIE_EXPIRE || "7d"; // Default to 7 days
+  let cookieExpire = process.env.REFRESH_TOKEN_EXPIRES || "7d"; // Default to 7 days
   let expireMs = 7 * 24 * 60 * 60 * 1000; // Default: 7 days in milliseconds
 
   if (typeof cookieExpire === "string") {
@@ -518,20 +600,15 @@ const sendTokenResponse = (user, statusCode, res) => {
     path: "/",
   };
 
-
   res
     .status(statusCode)
-    .cookie("token", token, options)
+    .cookie("refreshToken", refreshToken, options)
     .json({
       success: true,
-      token,
+      accessToken,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isVerified: user.isVerified,
-        phone: user.phone,
+       ...user._doc,
+       password: undefined 
       },
     });
 };

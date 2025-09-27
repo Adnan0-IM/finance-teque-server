@@ -33,6 +33,7 @@ const UserSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["investor", "startup", "admin", "none"],
+      default: "none",
       index: true,
     },
 
@@ -112,11 +113,31 @@ UserSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Sign JWT and return
-UserSchema.methods.getSignedJwtToken = function () {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET || "somesecret", {
-    expiresIn: process.env.JWT_EXPIRE || "30d",
-  });
+// Sign accessToken and return
+UserSchema.methods.getSignedAccessToken = function () {
+  return jwt.sign(
+    { id: this._id },
+    process.env.ACCESS_TOKEN_SECRET || "somesecret",
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRES || "15m",
+    }
+  );
+};
+
+// Sign refreshToken and return
+UserSchema.methods.getSignedRefreshToken = function () {
+  return jwt.sign(
+    { id: this._id },
+    process.env.REFRESH_TOKEN_SECRET || "somesecret",
+    {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRES || "7d",
+    }
+  );
+};
+
+// Backward-compatible alias for previous typo
+UserSchema.methods.getSignedResfreshToken = function () {
+  return this.getSignedRefreshToken();
 };
 
 // Helper methods for email verification

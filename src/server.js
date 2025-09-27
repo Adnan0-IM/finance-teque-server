@@ -9,7 +9,7 @@ const swaggerUi = require("swagger-ui-express");
 const path = require("path");
 const swaggerSpec = require("./swagger");
 const { connectDB } = require("./config/db");
-const crypto = require("crypto")
+const crypto = require("crypto");
 
 // Load env vars
 dotenv.config();
@@ -31,7 +31,7 @@ app.use(
   swaggerUi.setup(swaggerSpec, {
     explorer: true,
     customCss: ".swagger-ui .topbar { display: none }",
-  }),
+  })
 );
 
 // Enable CORS
@@ -44,7 +44,7 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Skip-Auth-Retry"],
-  }),
+  })
 );
 
 // Mount routes
@@ -66,11 +66,13 @@ app.use(
   express.static(path.join(__dirname, "uploads"), {
     fallthrough: true,
     maxAge: "7d",
-  }),
+  })
 );
 // Instead of using a wildcard, let's use a specific route for the SPA
 app.get("/", (_, res) => {
-  res.sendFile(path.join(__dirname, "../..", "finance-teque", "dist", "index.html"));
+  res.sendFile(
+    path.join(__dirname, "../..", "finance-teque", "dist", "index.html")
+  );
 });
 
 // Handle other routes for SPA
@@ -78,7 +80,9 @@ app.use((req, res, next) => {
   if (req.path.startsWith("/api")) {
     return next();
   }
-  res.sendFile(path.join(__dirname, "../..", "finance-teque", "dist", "index.html"));
+  res.sendFile(
+    path.join(__dirname, "../..", "finance-teque", "dist", "index.html")
+  );
 });
 
 // Multer/global error handler
@@ -108,11 +112,10 @@ app.get("/api/healthz", (_, res) => {
 const PORT = process.env.PORT || 3000;
 
 const startApp = async () => {
-  await connectDB()
+  await connectDB();
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
+};
 
-}
-
-startApp()
+startApp();

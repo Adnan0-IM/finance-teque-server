@@ -1,20 +1,7 @@
 const express = require("express");
-const {
-  register,
-  login,
-  getMe,
-  updateMe,
-  logout,
-  verifyEmail,
-  resendVerificationCode,
-  forgotPassword,
-  resetPassword,
-  setRole,
-  deleteMe,
-} = require("../controllers/auth");
-const { protect } = require("../middleware/auth");
-
 const router = express.Router();
+const auth = require("../controllers/auth");
+const { protect } = require("../middleware/auth");
 
 /**
  * @openapi
@@ -80,7 +67,7 @@ const router = express.Router();
  *       400:
  *         description: Invalid input or email already in use
  */
-router.post("/register", register);
+router.post("/register", auth.register);
 
 /**
  * @openapi
@@ -123,7 +110,7 @@ router.post("/register", register);
  *       400:
  *         description: Invalid or expired verification code
  */
-router.post("/verify-email", verifyEmail);
+router.post("/verify-email", auth.verifyEmail);
 
 /**
  * @openapi
@@ -151,7 +138,7 @@ router.post("/verify-email", verifyEmail);
  *       404:
  *         description: User not found
  */
-router.post("/resend-code", resendVerificationCode);
+router.post("/resend-code", auth.resendVerificationCode);
 
 /**
  * @openapi
@@ -208,7 +195,7 @@ router.post("/resend-code", resendVerificationCode);
  *       401:
  *         description: Invalid credentials
  */
-router.post("/login", login);
+router.post("/login", auth.login);
 
 /**
  * @openapi
@@ -249,7 +236,7 @@ router.post("/login", login);
  *       401:
  *         description: Not authenticated
  */
-router.get("/me", protect, getMe);
+router.get("/me", protect, auth.getMe);
 
 /**
  * @openapi
@@ -301,7 +288,7 @@ router.get("/me", protect, getMe);
  *       401:
  *         description: Not authenticated
  */
-router.put("/updateMe", protect, updateMe);
+router.put("/updateMe", protect, auth.updateMe);
 
 /**
  * @openapi
@@ -356,7 +343,7 @@ router.put("/updateMe", protect, updateMe);
  *       401:
  *         description: Not authenticated
  */
-router.put("/setRole", protect, setRole);
+router.put("/setRole", protect, auth.setRole);
 
 /**
  * @openapi
@@ -373,7 +360,7 @@ router.put("/setRole", protect, setRole);
  *       401:
  *         description: Not authenticated
  */
-router.delete("/deleteMe", protect, deleteMe);
+router.delete("/deleteMe", protect, auth.deleteMe);
 
 /**
  * @openapi
@@ -390,7 +377,7 @@ router.delete("/deleteMe", protect, deleteMe);
  *       401:
  *         description: Not authenticated
  */
-router.get("/logout", protect, logout);
+router.get("/logout", protect, auth.logout);
 
 /**
  * @openapi
@@ -417,7 +404,7 @@ router.get("/logout", protect, logout);
  *       404:
  *         description: User not found
  */
-router.post("/forgot-password", forgotPassword);
+router.post("/forgot-password", auth.forgotPassword);
 
 /**
  * @openapi
@@ -447,6 +434,34 @@ router.post("/forgot-password", forgotPassword);
  *       400:
  *         description: Invalid or expired token
  */
-router.post("/reset-password", resetPassword);
+router.post("/reset-password", auth.resetPassword);
+
+/**
+ * @openapi
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Refresh JWT token
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 token:
+ *                   type: string
+ *                   description: New JWT token
+ *       401:
+ *         description: Not authenticated
+ */
+router.post("/refresh", auth.refresh);
 
 module.exports = router;
