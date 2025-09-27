@@ -180,18 +180,7 @@ router.post("/resend-code", auth.resendVerificationCode);
  *                   type: string
  *                   description: JWT token (also set as HTTP-only cookie)
  *                 user:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     name:
- *                       type: string
- *                     email:
- *                       type: string
- *                     isVerified:
- *                       type: boolean
- *                     phone:
- *                       type: string
+ *                   $ref: "#/components/schemas/User"
  *       401:
  *         description: Invalid credentials
  */
@@ -218,21 +207,7 @@ router.post("/login", auth.login);
  *                   type: boolean
  *                   example: true
  *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     name:
- *                       type: string
- *                     email:
- *                       type: string
- *                     role:
- *                       type: string
- *                       enum: [investor, startup]
- *                     isVerified:
- *                       type: boolean
- *                     phone:
- *                       type: string
+ *                   $ref: "#/components/schemas/User"
  *       401:
  *         description: Not authenticated
  */
@@ -459,6 +434,8 @@ router.post("/reset-password", auth.resetPassword);
  *                 token:
  *                   type: string
  *                   description: New JWT token
+ *                 user:
+ *                   $ref: "#/components/schemas/User"
  *       401:
  *         description: Not authenticated
  */

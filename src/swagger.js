@@ -79,14 +79,7 @@ try {
     properties: {
       success: { type: "boolean", example: true },
       token: { type: "string", description: "JWT authentication token" },
-      user: { type: "object", properties: {
-          id: { type: "string" },
-          name: { type: "string" },
-          email: { type: "string" },
-          isVerified: { type: "boolean" },
-          phone: { type: "string" }
-        }
-      }
+      user: { $ref: "#/components/schemas/User" },
     }
   };
 
