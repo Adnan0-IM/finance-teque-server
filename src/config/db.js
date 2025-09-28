@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { ensureAdminUser } = require("../utils/admin");
+const { ensureAdminUser, seedFakeUsers } = require("../utils/admin");
 
 const connectDB = async () => {
   // Connect to MongoDB
@@ -9,6 +9,7 @@ const connectDB = async () => {
 
       // Seed an admin if configured
       await ensureAdminUser();
+      await seedFakeUsers()
 
   } catch (error) {
       console.error("MongoDB connection error:", error) 
