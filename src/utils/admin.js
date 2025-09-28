@@ -27,6 +27,7 @@ async function ensureAdminUser() {
     role: "admin",
     isVerified: true,
     emailVerified: true,
+    verification: { status: "approved", submittedAt: new Date()},
   });
 
   console.log("[Admin seed] Admin user created:", email);
