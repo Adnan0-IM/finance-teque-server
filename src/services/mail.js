@@ -193,6 +193,64 @@ const verificationReceivedSection = ({ name }) => `
   </p>
 `;
 
+// Retry controls and helpers
+const EMAIL_DISABLED = process.env.EMAIL_DISABLED === "1";
+const RETRY_ATTEMPTS = Number(process.env.SENDGRID_MAX_RETRIES || 5);
+const RETRY_BASE_MS = Number(process.env.SENDGRID_RETRY_BASE_MS || 300);
+
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const isRetryableError = (err) => {
+  const code = err?.code || err?.errno || err?.cause?.code;
+  const status = err?.response?.statusCode || err?.response?.status;
+  const netCodes = new Set([
+    "EAI_AGAIN",
+    "ENOTFOUND",
+    "ECONNRESET",
+    "ETIMEDOUT",
+    "EHOSTUNREACH",
+    "EPIPE",
+    "ECONNREFUSED",
+    "EADDRINUSE",
+  ]);
+  if (code && netCodes.has(code)) return true;
+  if (status === 429 || (typeof status === "number" && status >= 500))
+    return true;
+  return false;
+};
+
+async function sendWithRetry(msg) {
+  if (EMAIL_DISABLED) {
+    console.warn("Email sending disabled (EMAIL_DISABLED=1) — skipping.");
+    return;
+  }
+  if (!process.env.SENDGRID_API_KEY) {
+    console.warn("SENDGRID_API_KEY missing — skipping email send.");
+    return;
+  }
+  let lastErr;
+  for (let attempt = 1; attempt <= RETRY_ATTEMPTS; attempt++) {
+    try {
+      await sgMail.send(msg);
+      return;
+    } catch (err) {
+      lastErr = err;
+      const retryable = isRetryableError(err);
+      if (!retryable || attempt === RETRY_ATTEMPTS) throw err;
+      const wait =
+        Math.min(5000, RETRY_BASE_MS * 2 ** (attempt - 1)) +
+        Math.floor(Math.random() * 200);
+      console.warn(
+        `SendGrid send failed (${
+          err.code || err.message || "error"
+        }); retrying in ${wait}ms… [${attempt}/${RETRY_ATTEMPTS}]`
+      );
+      await delay(wait);
+    }
+  }
+  throw lastErr;
+}
+
 async function sendVerificationEmail(to, code) {
   const name = to.split("@")[0];
   const html = baseTemplate({
@@ -207,7 +265,7 @@ async function sendVerificationEmail(to, code) {
     text: `Hello ${name},\n\nYour OTP is: ${code}\n\nThe code expires in 10 minutes.\n\nIf you didn’t request this, ignore this email.`,
     html,
   };
-  await sgMail.send(msg);
+  await sendWithRetry(msg);
 }
 
 async function sendResetPasswordEmail(to, token) {
@@ -227,7 +285,7 @@ async function sendResetPasswordEmail(to, token) {
     text: `Hello ${name},\n\nUse this link to reset your password (expires in 30 minutes):\n${resetUrl}\n\nIf you didn’t request this, ignore this email.`,
     html,
   };
-  await sgMail.send(msg);
+  await sendWithRetry(msg);
 }
 
 async function sendWelcomeEmail(to, name = to.split("@")[0]) {
@@ -243,7 +301,7 @@ async function sendWelcomeEmail(to, name = to.split("@")[0]) {
     text: `Hello ${name},\n\nWelcome to Finance Teque! Access your account:\n${APP_URL}/dashboard\n\nWe’re glad you’re here.`,
     html,
   };
-  await sgMail.send(msg);
+  await sendWithRetry(msg);
 }
 
 async function sendVerificationSubmittedEmail(to, name = to.split("@")[0]) {
@@ -259,7 +317,7 @@ async function sendVerificationSubmittedEmail(to, name = to.split("@")[0]) {
     text: `Hello ${name},\n\nWe’ve received your verification details. We’ll notify you once the review is complete.\n\nYou can check your dashboard: ${APP_URL}/dashboard`,
     html,
   };
-  await sgMail.send(msg);
+  await sendWithRetry(msg);
 }
 
 async function sendAdminVerificationNotification(
@@ -294,7 +352,7 @@ async function sendAdminVerificationNotification(
     text: `New verification submitted.\nName: ${name}\nEmail: ${email}\nAdmin: ${APP_URL}/admin`,
     html,
   };
-  await sgMail.send(msg);
+  await sendWithRetry(msg);
 }
 
 module.exports = {
