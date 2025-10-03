@@ -5,6 +5,8 @@ const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth");
 const verificationRoutes = require("./routes/verification");
 const adminRoutes = require("./routes/admin");
+const carouselRoutes = require("./routes/carousel")
+const uploadRoutes = require("./routes/uploads")
 const swaggerUi = require("swagger-ui-express");
 const path = require("path");
 const swaggerSpec = require("./swagger");
@@ -53,6 +55,8 @@ app.use("/api/verification", verificationRoutes);
 
 // Mount admin routes
 app.use("/api/admin", adminRoutes);
+app.use("/api/carousel", carouselRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 // Serve static files
 app.use(express.static(path.join(__dirname, "../..", "finance-teque", "dist")));
