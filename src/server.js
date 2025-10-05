@@ -12,6 +12,7 @@ const path = require("path");
 const swaggerSpec = require("./swagger");
 const { connectDB } = require("./config/db");
 const crypto = require("crypto");
+const subscribeRoute = require("./services/newsletterSubscribe");
 
 // Load env vars
 dotenv.config();
@@ -52,6 +53,7 @@ app.use(
 // Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/verification", verificationRoutes);
+app.use("/api", subscribeRoute)
 
 // Mount admin routes
 app.use("/api/admin", adminRoutes);
