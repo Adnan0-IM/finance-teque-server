@@ -50,6 +50,10 @@ const UserSchema = new mongoose.Schema(
       personal: {
         firstName: String,
         surname: String,
+        ageBracket: {
+          type: String,
+          enum: ["adult", "minor"],
+        },
         dateOfBirth: String,
         localGovernment: String,
         stateOfResidence: String,
