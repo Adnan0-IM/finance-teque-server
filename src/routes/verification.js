@@ -185,4 +185,6 @@ router.post(
  */
 router.get("/status", protect, getVerificationStatus);
 
+router.post("/corporate", protect, submitCorporateVerification)
+
 module.exports = router;

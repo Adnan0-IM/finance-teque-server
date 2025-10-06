@@ -66,6 +66,51 @@ const UserSchema = new mongoose.Schema(
         residentialAddress: String,
         ninNumber: String,
       },
+
+      // Add: corporate verification payload
+      corporate: {
+        company: {
+          name: String,
+          incorporationNumber: String, // RC/CAC
+          dateOfIncorporation: String,
+          industry: String,
+          address: String,
+          state: String,
+          lga: String,
+          phone: String,
+          email: String,
+          logo: String, // file key/url
+        },
+        bankDetails: {
+          bankName: String,
+          accountNumber: String,
+          accountName: String,
+          accountType: { type: String, default: "Corporate" },
+          bvnNumber: String, // optional
+        },
+        documents: {
+          certificateOfIncorporation: String,
+          memorandumAndArticles: String, // optional
+          utilityBill: String,
+          tinCertificate: String, // optional
+        },
+        signatories: [
+          {
+            fullName: String,
+            position: String,
+            phoneNumber: String,
+            bvnNumber: String, // optional
+            email: String,
+            idDocument: String, // file key/url
+            signature: String, // file key/url (optional)
+          },
+        ],
+        referral: {
+          officerName: String,
+          contact: String,
+        },
+      },
+
       nextOfKin: {
         fullName: String,
         phoneNumber: String,
@@ -96,6 +141,7 @@ const UserSchema = new mongoose.Schema(
       reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       submittedAt: Date,
     },
+    corporateVerification: {},
     createdAt: {
       type: Date,
       default: Date.now,

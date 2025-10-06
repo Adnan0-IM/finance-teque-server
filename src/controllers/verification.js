@@ -206,3 +206,46 @@ exports.getVerificationStatus = async (req, res) => {
     });
   }
 };
+
+// @desc
+// @route POST /api/verification
+// @access Private
+exports.submitCorporateVerification = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { company, bankDetails, documents, signatories, referral } = req.body;
+
+    if (signatories.length < 0) {
+      return res
+        .status(400)
+        .json({ succes: false, message: "At least one signatory is required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    user.verification = user.verification || {};
+    user.verification.corporate = {
+      company,
+      bankDetails,
+      documents,
+      signatories,
+      referral,
+    };
+    user.verification.status = "pending";
+    user.verification.rejectionReason = undefined;
+    user.verification.submittedAt = new Date();
+
+    await user.save();
+    res.status(201).json({ success: true, verification: user.verification });
+  } catch (error) {
+    console.error("Verification submission error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error during verification submission",
+      error: error.message,
+    });
+  }
+};
