@@ -233,7 +233,7 @@ exports.resendVerificationCode = async (req, res) => {
   }
 };
 
-// @desc PUT set Current logged i user role
+// @desc PUT set Current logged in user role
 // @route PUT /api/auth/setRole
 // @access Private
 exports.setRole = async (req, res) => {
@@ -278,6 +278,51 @@ exports.setRole = async (req, res) => {
   }
 };
 
+// @desc PUT set Current logged in user roleType(investor)
+// @route PUT /api/auth/setInvestorType
+// @access Private
+
+exports.setInvestorType = async (req, res) => {
+  const {type} = req.body
+
+  if (type !== "personal" && type !== "corporate")
+    return res.status(403).json({
+      success: false,
+      message: "personal and corporate are the only accepted types",
+    });
+  try {
+    if (!type) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Type is required" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { investorType: type },
+      { new: true, runValidators: true }
+    );
+    res.status(200).json({
+      success: true,
+      data: {
+        id: user?._id,
+        name: user?.name,
+        email: user?.email,
+        role: user?.role,
+        investorType: user?.investorType,
+        isVerified: user?.isVerified,
+        phone: user?.phone,
+      },
+    });
+  } catch (error) {
+    console.error("Set investorType error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error setting investor type",
+      error: error.message,
+    });
+  }
+}
 // @desc    Get current logged in user
 // @route   GET /api/auth/me
 // @access  Private

@@ -36,6 +36,12 @@ const UserSchema = new mongoose.Schema(
       default: "none",
       index: true,
     },
+    investorType: {
+      type: String,
+      enum: ["personal", "corporate", "none"],
+      default: "none",
+      index: true,
+    },
 
     isVerified: { type: Boolean, default: false },
     emailVerified: { type: Boolean, default: false },

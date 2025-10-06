@@ -320,6 +320,8 @@ router.put("/updateMe", protect, auth.updateMe);
  */
 router.put("/setRole", protect, auth.setRole);
 
+router.put("/setInvestorType", protect, auth.setInvestorType)
+
 /**
  * @openapi
  * /api/auth/deleteMe:
