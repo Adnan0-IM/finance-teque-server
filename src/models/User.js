@@ -76,7 +76,7 @@ const UserSchema = new mongoose.Schema(
           industry: String,
           address: String,
           state: String,
-          lga: String,
+          localGovernment: String,
           phone: String,
           email: String,
           logo: String, // file key/url
