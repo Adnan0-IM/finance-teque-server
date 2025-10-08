@@ -3,6 +3,72 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
+const CorporateVerificationSchema = new mongoose.Schema(
+  {
+    company: {
+      name: String,
+      incorporationNumber: String,
+      dateOfIncorporation: String,
+      address: String,
+      state: String,
+      localGovernment: String,
+      phone: String,
+      email: String,
+      logo: String,
+    },
+    bankDetails: {
+      bankName: String,
+      accountNumber: String,
+      accountName: String,
+      accountType: { type: String, default: "Corporate" },
+      bvnNumber: String,
+    },
+    documents: {
+      type: Object,
+      default: {}, // important
+    },
+    signatories: {
+      type: [
+        {
+          fullName: String,
+          position: String,
+          phoneNumber: String,
+          bvnNumber: String,
+          email: String,
+          idDocument: String,
+          signature: String,
+        },
+      ],
+      default: [],
+    },
+    referral: {
+      officerName: String,
+      contact: String,
+    },
+  },
+  { _id: false }
+);
+
+const VerificationSchema = new mongoose.Schema(
+  {
+    personal: { type: Object, default: {} },
+    nextOfKin: { type: Object, default: {} },
+    bankDetails: { type: Object, default: {} },
+    documents: { type: Object, default: {} },
+    corporate: { type: CorporateVerificationSchema, default: {} }, // default object
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+    rejectionReason: String,
+    reviewedAt: Date,
+    reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    submittedAt: Date,
+  },
+  { _id: false }
+);
+
 const UserSchema = new mongoose.Schema(
   {
     name: {
@@ -52,95 +118,7 @@ const UserSchema = new mongoose.Schema(
     // Fields for password reset flow
     resetPasswordToken: { type: String },
     resetPasswordExpire: { type: Date },
-    verification: {
-      personal: {
-        firstName: String,
-        surname: String,
-        ageBracket: {
-          type: String,
-          enum: ["adult", "minor"],
-        },
-        dateOfBirth: String,
-        localGovernment: String,
-        stateOfResidence: String,
-        residentialAddress: String,
-        ninNumber: String,
-      },
-
-      // Add: corporate verification payload
-      corporate: {
-        company: {
-          name: String,
-          incorporationNumber: String, // RC/CAC
-          dateOfIncorporation: String,
-          industry: String,
-          address: String,
-          state: String,
-          localGovernment: String,
-          phone: String,
-          email: String,
-          logo: String, // file key/url
-        },
-        bankDetails: {
-          bankName: String,
-          accountNumber: String,
-          accountName: String,
-          accountType: { type: String, default: "Corporate" },
-          bvnNumber: String, // optional
-        },
-        documents: {
-          certificateOfIncorporation: String,
-          memorandumAndArticles: String, // optional
-          utilityBill: String,
-          tinCertificate: String, // optional
-        },
-        signatories: [
-          {
-            fullName: String,
-            position: String,
-            phoneNumber: String,
-            bvnNumber: String, // optional
-            email: String,
-            idDocument: String, // file key/url
-            signature: String, // file key/url (optional)
-          },
-        ],
-        referral: {
-          officerName: String,
-          contact: String,
-        },
-      },
-
-      nextOfKin: {
-        fullName: String,
-        phoneNumber: String,
-        email: String,
-        residentialAddress: String,
-        relationship: String,
-      },
-      bankDetails: {
-        accountName: String,
-        accountNumber: String,
-        bankName: String,
-        bvnNumber: String,
-        accountType: String,
-      },
-      documents: {
-        idDocument: String,
-        passportPhoto: String,
-        utilityBill: String,
-      },
-      status: {
-        type: String,
-        enum: ["pending", "approved", "rejected"],
-        default: "pending",
-      },
-      // review metadata for admin actions
-      rejectionReason: String,
-      reviewedAt: Date,
-      reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-      submittedAt: Date,
-    },
+    verification: { type: VerificationSchema, default: {} },
     corporateVerification: {},
     createdAt: {
       type: Date,
