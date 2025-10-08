@@ -3,9 +3,11 @@ const {
   submitVerification,
   uploadDocuments,
   getVerificationStatus,
+  submitCorporateVerification,
+  submitCorporateVerificationDocuments,
 } = require("../controllers/verification");
 const { protect } = require("../middleware/auth");
-const { upload } = require("../middleware/upload");
+const { upload, uploadCorporate } = require("../middleware/upload");
 
 const router = express.Router();
 
@@ -140,6 +142,7 @@ router.post(
     { name: "passportPhoto", maxCount: 1 },
     { name: "utilityBill", maxCount: 1 },
   ]),
+  (err, req, res, next) => next(err),
   uploadDocuments
 );
 
@@ -185,6 +188,33 @@ router.post(
  */
 router.get("/status", protect, getVerificationStatus);
 
-router.post("/corporate", protect, submitCorporateVerification)
+// Corporate (text)
+router.post("/corporate", protect, submitCorporateVerification);
+
+// Corporate (documents) with higher file cap and dynamic field names
+router.post(
+  "/corporate/documents",
+  protect,
+  (req, res, next) => {
+    uploadCorporate.any()(req, res, (err) => {
+      if (!err) return next();
+      // Normalize Multer errors
+      if (err.code === "LIMIT_FILE_COUNT") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Too many files" });
+      }
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res
+          .status(400)
+          .json({ success: false, message: "File too large (max 5MB)" });
+      }
+      return res
+        .status(400)
+        .json({ success: false, message: err.message || "Upload error" });
+    });
+  },
+  submitCorporateVerificationDocuments
+);
 
 module.exports = router;
