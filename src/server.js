@@ -74,6 +74,7 @@ app.use(
     maxAge: "7d",
   })
 );
+
 // Instead of using a wildcard, let's use a specific route for the SPA
 app.get("/", (_, res) => {
   res.sendFile(
